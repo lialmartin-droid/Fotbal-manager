@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Textový fotbalový manažer</title>
+<style>
+:root{
+  --bg:#101827; --card:#172235; --card2:#1f2d44; --text:#eef4ff; --muted:#9fb0c7;
+  --accent:#52d273; --danger:#ff6961; --warn:#ffd166; --line:#2d3c55;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+header{padding:16px;background:#0b1220;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+h1{margin:0 0 8px;font-size:22px}
+nav{display:flex;gap:8px;overflow:auto}
+button,select,input{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:10px;padding:9px 11px}
+button{cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#07110b;font-weight:bold}
+button.danger{background:var(--danger);color:#190505}
+main{padding:14px;max-width:1300px;margin:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:12px}
+.card h2,.card h3{margin-top:0}
+.small{font-size:13px;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hidden{display:none}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:7px;text-align:left}
+th{color:var(--muted);font-weight:normal}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 7px;color:var(--muted);font-size:12px}
+.exp{height:9px;background:#0d1422;border-radius:999px;overflow:hidden;border:1px solid var(--line);min-width:80px}
+.exp div{height:100%;background:var(--accent)}
+.log{white-space:pre-wrap;line-height:1.45;max-height:420px;overflow:auto}
+.ok{color:var(--accent)} .bad{color:var(--danger)} .warn{color:var(--warn)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Textový fotbalový manažer</h1>
+  <nav>
+    <button onclick="showTab('home')">Přehled</button>
+    <button onclick="showTab('squad')">Hráči</button>
+    <button onclick="showTab('academy')">Akademie</button>
+    <button onclick="showTab('league')">Liga</button>
+    <button onclick="showTab('cups')">Poháry</button>
+    <button onclick="showTab('market')">Přestupy</button>
+    <button onclick="showTab('history')">Historie</button>
+    <button onclick="saveGame()">Uložit</button>
+  </nav>
+</header>
+
+<main>
+<section id="setup" class="card">
+  <h2>Nová hra</h2>
+  <p class="small">Všichni hráči všech klubů začínají se silou 1. Jména hráčů jsou generovaná.</p>
+  <div class="row">
+    <label>Vyber klub:</label>
+    <select id="clubSelect"></select>
+    <button class="primary" onclick="newGame()">Začít kariéru</button>
+    <button onclick="loadGame()">Načíst uloženou hru</button>
+  </div>
+</section>
+
+<section id="game" class="hidden">
+  <section id="home" class="tab">
+    <div class="grid">
+      <div class="card">
+        <h2 id="clubName"></h2>
+        <p id="clubInfo"></p>
+        <div class="row">
+          <button class="primary" onclick="playNextMatch()">Odehrát další zápas</button>
+          <button onclick="nextSeason()">Ukončit sezonu</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Realizační tým</h3>
+        <p id="staffInfo"></p>
+        <button onclick="upgradeStaff()">Vylepšit realizační tým</button>
+      </div>
+      <div class="card">
+        <h3>Sponzor</h3>
+        <p id="sponsorInfo"></p>
+        <button onclick="negotiateSponsor()">Jednat o sponzorovi</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Poslední události</h3>
+      <div id="log" class="log"></div>
+    </div>
+  </section>
+
+  <section id="squad" class="tab hidden">
+    <div class="card">
+      <h2>A-tým</h2>
+      <div id="squadTable"></div>
+    </div>
+  </section>
+
+  <section id="academy" class="tab hidden">
+    <div class="card">
+      <h2>Akademie</h2>
+      <p id="academyInfo"></p>
+      <div class="row">
+        <button onclick="upgradeAcademy()">Vylepšit akademii</button>
+        <button onclick="generateAcademyPlayer()">Najít talent</button>
+      </div>
+      <div id="academyTable"></div>
+    </div>
+  </section>
+
+  <section id="league" class="tab hidden">
+    <div class="card">
+      <h2>Ligová tabulka</h2>
+      <div id="leagueTable"></div>
+    </div>
+  </section>
+
+  <section id="cups" class="tab hidden">
+    <div class="grid">
+      <div class="card"><h2>Národní pohár</h2><div id="nationalCup"></div></div>
+      <div class="card"><h2>Evropské poháry</h2><div id="euroCups"></div></div>
+    </div>
+  </section>
+
+  <section id="market" class="tab hidden">
+    <div class="card">
+      <h2>Přestupový trh</h2>
+      <button onclick="refreshMarket()">Obnovit trh</button>
+      <div id="marketTable"></div>
+    </div>
+  </section>
+
+  <section id="history" class="tab hidden">
+    <div class="card">
+      <h2>Historie, rekordy a Síň slávy</h2>
+      <div id="historyBox"></div>
+      <button class="danger" onclick="resetGame()">Smazat uloženou hru</button>
+    </div>
+  </section>
+</section>
+</main>
+
+<script>
+const CLUBS = [
+"AC Sparta Praha","SK Slavia Praha","FC Viktoria Plzeň","FC Baník Ostrava","FC Slovan Liberec","FK Jablonec",
+"Bohemians Praha 1905","1. FC Slovácko","SK Sigma Olomouc","FK Mladá Boleslav","FC Hradec Králové","FK Teplice",
+"Manchester United","Liverpool FC","Arsenal FC","Chelsea FC","Manchester City","Tottenham Hotspur",
+"Real Madrid CF","FC Barcelona","Atlético Madrid","Valencia CF","Sevilla FC","Villarreal CF",
+"FC Bayern München","Borussia Dortmund","Bayer 04 Leverkusen","RB Leipzig","AC Milan","Inter Milan",
+"Juventus FC","SSC Napoli","AS Roma","Paris Saint-Germain","Olympique Lyonnais","Olympique de Marseille"
+];
+
+const FIRST = ["Jan","Tomáš","Petr","Lukáš","Martin","David","Adam","Filip","Matěj","Jakub","Ondřej","Václav","Marek","Daniel","Aleš","Roman","Milan","Patrik","Nicolas","Samuel","Erik","Dominik"];
+const LAST = ["Novák","Svoboda","Dvořák","Černý","Procházka","Kučera","Veselý","Horák","Němec","Pokorný","Malý","Král","Urban","Beneš","Fiala","Sedláček","Navrátil","Kopecký","Bartoš","Vlček"];
+const POS = ["BR","OB","OB","OB","ZA","ZA","ZA","ZA","KŘ","KŘ","ÚT"];
+let game = null;
+
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function money(n){return Math.round(n).toLocaleString("cs-CZ")+" Kč"}
+function expPercent(p){return Math.min(100, Math.round((p.exp/p.expToNext)*100))}
+
+function randomName(){return pick(FIRST)+" "+pick(LAST)}
+function salary(p){return 800 + p.strength*350 + Math.max(0, 28-p.age)*25}
+function value(p){return (p.strength*12000)+(p.potential*6000)+Math.max(0,26-p.age)*2500}
+function makePlayer(ageMin=18, ageMax=34, academy=false){
+  const p = {
+    id:id(), name:randomName(), age:rnd(ageMin,ageMax), position:pick(POS),
+    strength:1, potential:rnd(8,35), exp:0, expToNext:100,
+    injured:0, goals:0, assists:0, matches:0, academy
+  };
+  p.salary = academy ? 0 : salary(p);
+  p.value = value(p);
+  return p;
+}
+function makeTeam(name){
+  const players = [];
+  for(let i=0;i<22;i++) players.push(makePlayer());
+  return {name, players, points:0, gf:0, ga:0, wins:0, draws:0, losses:0, coefficient:1};
+}
+function resetTable(){
+  game.teams.forEach(t=>{t.points=0;t.gf=0;t.ga=0;t.wins=0;t.draws=0;t.losses=0});
+}
+function fillClubSelect(){
+  clubSelect.innerHTML = CLUBS.map(c=>`<option>${c}</option>`).join("");
+}
+function newGame(){
+  const chosen = clubSelect.value;
+  let selected = [chosen, ...CLUBS.filter(c=>c!==chosen).slice(0,15)];
+  game = {
+    season:1, round:1, userClub:chosen, money:500000, reputation:1,
+    academyLevel:1, staffLevel:1, sponsor:50000, market:[],
+    teams:selected.map(makeTeam), academy:[], log:[], history:[], hall:[],
+    nationalCup:{round:1, active:true, last:"Pohár ještě nezačal."},
+    euro:{qualified:false, competition:"", round:0, last:"Do Evropy se lze kvalifikovat dobrým umístěním v lize."}
+  };
+  for(let i=0;i<5;i++) generateAcademyPlayer(false);
+  refreshMarket(false);
+  addLog("Nová kariéra začíná. Klub: "+chosen);
+  saveGame(false); render();
+}
+function getUserTeam(){return game.teams.find(t=>t.name===game.userClub)}
+function teamPower(t){
+  return t.players.filter(p=>p.injured<=0).sort((a,b)=>b.strength-a.strength).slice(0,11).reduce((s,p)=>s+p.strength,0);
+}
+function addExp(p, amount){
+  if(p.age<=21) amount*=1.35;
+  amount *= 1 + (p.potential/100);
+  p.exp += Math.round(amount);
+  while(p.exp>=p.expToNext && p.strength<p.potential){
+    p.exp-=p.expToNext; p.strength++; p.expToNext=Math.round(p.expToNext*1.18);
+    p.salary=salary(p); p.value=value(p);
+  }
+}
+function simulateMatch(a,b,official=true){
+  const pa = teamPower(a), pb = teamPower(b);
+  let ag = Math.max(0, Math.round((Math.random()*2.2)+(pa/(pa+pb+1))*2.2-0.4));
+  let bg = Math.max(0, Math.round((Math.random()*2.2)+(pb/(pa+pb+1))*2.2-0.4));
+  if(official){
+    a.gf+=ag; a.ga+=bg; b.gf+=bg; b.ga+=ag;
+    if(ag>bg){a.points+=3;a.wins++;b.losses++}
+    else if(bg>ag){b.points+=3;b.wins++;a.losses++}
+    else{a.points++;b.points++;a.draws++;b.draws++}
+  }
+  [a,b].forEach(t=>{
+    t.players.filter(p=>p.injured<=0).sort((x,y)=>y.strength-x.strength).slice(0,11).forEach(p=>{
+      p.matches++; addExp(p, rnd(8,18)+(t===a?ag:bg)*4);
+      if(Math.random()<0.025){p.injured=rnd(1,5)}
+    });
+  });
+  const scorersA = a.players.slice(0,11);
+  const scorersB = b.players.slice(0,11);
+  for(let i=0;i<ag;i++) pick(scorersA).goals++;
+  for(let i=0;i<bg;i++) pick(scorersB).goals++;
+  return `${a.name} ${ag}:${bg} ${b.name}`;
+}
+function playNextMatch(){
+  if(!game) return;
+  if(game.round>30){addLog("Liga je dohraná. Můžeš ukončit sezonu."); render(); return;}
+  game.teams.forEach(t=>t.players.forEach(p=>{if(p.injured>0)p.injured--}));
+  const teams=[...game.teams];
+  for(let i=0;i<teams.length;i+=2){
+    const r = simulateMatch(teams[i],teams[i+1],true);
+    if(r.includes(game.userClub)) addLog("Liga, kolo "+game.round+": "+r);
+  }
+  playCupsAuto();
+  payMonthlyCosts();
+  game.round++;
+  saveGame(false); render();
+}
+function playCupsAuto(){
+  if(game.round%5===0){
+    const u=getUserTeam(), opp=pick(game.teams.filter(t=>t.name!==u.name));
+    const r=simulateMatch(u,opp,false);
+    game.nationalCup.last="Národní pohár: "+r;
+    addLog(game.nationalCup.last);
+    if(!r.match(new RegExp(game.userClub+" [0-9]+:[0-9]+"))?.[0]){}
+  }
+  if(game.euro.qualified && game.round%4===0){
+    const opp=makeTeam(pick(CLUBS.filter(c=>c!==game.userClub)));
+    const r=simulateMatch(getUserTeam(),opp,false);
+    game.euro.last=game.euro.competition+": "+r;
+    addLog(game.euro.last);
+    game.money += 35000;
+    game.reputation += 0.05;
+  }
+}
+function payMonthlyCosts(){
+  if(game.round%4!==0)return;
+  const wages = getUserTeam().players.reduce((s,p)=>s+p.salary,0);
+  game.money += game.sponsor - wages;
+  addLog("Finance: sponzor "+money(game.sponsor)+" / mzdy "+money(wages)+".");
+}
+function standings(){
+  return [...game.teams].sort((a,b)=>b.points-a.points || (b.gf-b.ga)-(a.gf-a.ga) || b.gf-a.gf);
+}
+function nextSeason(){
+  const table = standings();
+  const pos = table.findIndex(t=>t.name===game.userClub)+1;
+  game.history.unshift(`Sezona ${game.season}: ${game.userClub} skončil na ${pos}. místě.`);
+  game.money += Math.max(50000, (17-pos)*25000);
+  game.euro.qualified = pos<=5;
+  game.euro.competition = pos===1 ? "Liga mistrů" : pos<=3 ? "Evropská liga" : "Konferenční liga";
+  if(game.euro.qualified) addLog("Kvalifikace do Evropy: "+game.euro.competition);
+  getUserTeam().players.forEach(p=>{
+    p.age++;
+    if(p.age>33 && Math.random()<0.25){p.strength=Math.max(1,p.strength-1)}
+    if(p.age>37 || (p.age>34 && Math.random()<0.1)){
+      game.hall.unshift(`${p.name} ukončil kariéru. Góly: ${p.goals}, zápasy: ${p.matches}`);
+      Object.assign(p, makePlayer(18,22,false));
+    }
+  });
+  game.season++; game.round=1; resetTable();
+  game.teams.forEach(t=>t.players.forEach(p=>{p.goals=0;p.assists=0;p.matches=0;p.injured=0}));
+  saveGame(false); render();
+}
+function upgradeAcademy(){
+  const cost=game.academyLevel*120000;
+  if(game.money<cost)return addLog("Nedostatek peněz na akademii.");
+  game.money-=cost; game.academyLevel++; addLog("Akademie vylepšena na úroveň "+game.academyLevel+"."); render();
+}
+function generateAcademyPlayer(renderNow=true){
+  const p=makePlayer(15,18,true);
+  p.potential += game?.academyLevel ? game.academyLevel*3 : 0;
+  p.expToNext=80;
+  game.academy.push(p);
+  if(renderNow){addLog("Akademie našla talent: "+p.name); render();}
+}
+function promote(idp){
+  const p=game.academy.find(x=>x.id===idp); if(!p)return;
+  p.academy=false; p.salary=salary(p); p.value=value(p);
+  getUserTeam().players.push(p);
+  game.academy=game.academy.filter(x=>x.id!==idp);
+  addLog(p.name+" povýšil do A-týmu."); render();
+}
+function upgradeStaff(){
+  const cost=game.staffLevel*100000;
+  if(game.money<cost)return addLog("Nedostatek peněz na realizační tým.");
+  game.money-=cost; game.staffLevel++;
+  getUserTeam().players.forEach(p=>addExp(p, game.staffLevel*5));
+  addLog("Realizační tým vylepšen na úroveň "+game.staffLevel+"."); render();
+}
+function negotiateSponsor(){
+  game.sponsor = Math.round(50000 + game.reputation*30000 + game.staffLevel*5000);
+  addLog("Nový sponzor: "+money(game.sponsor)+" měsíčně."); render();
+}
+function refreshMarket(renderNow=true){
+  game.market=[];
+  for(let i=0;i<10;i++){let p=makePlayer(18,32,false); p.potential+=rnd(0,12); p.value=value(p); game.market.push(p)}
+  if(renderNow) render();
+}
+function buy(idp){
+  const p=game.market.find(x=>x.id===idp); if(!p)return;
+  if(game.money<p.value)return addLog("Na hráče nemáš dost peněz.");
+  game.money-=p.value; getUserTeam().players.push(p); game.market=game.market.filter(x=>x.id!==idp);
+  addLog("Koupen hráč "+p.name+" za "+money(p.value)+"."); render();
+}
+function sell(idp){
+  const team=getUserTeam(); const p=team.players.find(x=>x.id===idp); if(!p || team.players.length<=11)return;
+  game.money+=p.value; team.players=team.players.filter(x=>x.id!==idp);
+  addLog("Prodán hráč "+p.name+" za "+money(p.value)+"."); render();
+}
+function addLog(t){game.log.unshift(t); game.log=game.log.slice(0,80)}
+function showTab(idt){document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden")); document.getElementById(idt).classList.remove("hidden")}
+function render(){
+  if(!game)return;
+  setup.classList.add("hidden"); document.getElementById("game").classList.remove("hidden");
+  const u=getUserTeam();
+  clubName.textContent = game.userClub;
+  clubInfo.innerHTML = `Sezona ${game.season}, kolo ${game.round}/30<br>Peníze: <b>${money(game.money)}</b><br>Reputace: ${game.reputation.toFixed(2)}<br>Síla týmu: ${teamPower(u)}`;
+  staffInfo.innerHTML = `Úroveň: ${game.staffLevel}<br>Bonus: rychlejší růst hráčů`;
+  sponsorInfo.innerHTML = `Měsíčně: <b>${money(game.sponsor)}</b>`;
+  log.textContent = game.log.join("\n");
+  squadTable.innerHTML = playerTable(u.players,false);
+  academyInfo.innerHTML = `Úroveň akademie: ${game.academyLevel}<br>Vyšší úroveň = lepší potenciál talentů.`;
+  academyTable.innerHTML = playerTable(game.academy,true);
+  leagueTable.innerHTML = tableHTML(standings());
+  nationalCup.innerHTML = `<p>${game.nationalCup.last}</p>`;
+  euroCups.innerHTML = `<p>${game.euro.last}</p><p>Kvalifikace: ${game.euro.qualified ? game.euro.competition : "zatím ne"}</p>`;
+  marketTable.innerHTML = marketHTML();
+  historyBox.innerHTML = `<h3>Historie sezon</h3>${game.history.map(x=>`<p>${x}</p>`).join("") || "<p>Zatím žádná historie.</p>"}<h3>Síň slávy</h3>${game.hall.map(x=>`<p>${x}</p>`).join("") || "<p>Zatím prázdná.</p>"}`;
+}
+function playerTable(players, academy){
+  return `<table><tr><th>Jméno</th><th>Věk</th><th>Poz.</th><th>Síla</th><th>Potenciál</th><th>EXP</th><th>Plat</th><th>Cena</th><th>Stav</th><th>Akce</th></tr>`+
+  players.sort((a,b)=>b.strength-a.strength).map(p=>`
+  <tr>
+    <td>${p.name}</td><td>${p.age}</td><td>${p.position}</td><td>${p.strength}</td><td>${p.potential}</td>
+    <td><div class="exp"><div style="width:${expPercent(p)}%"></div></div><span class="small">${p.exp}/${p.expToNext}</span></td>
+    <td>${money(p.salary)}</td><td>${money(p.value)}</td>
+    <td>${p.injured>0?`<span class="bad">Zraněn ${p.injured} kol</span>`:"OK"}</td>
+    <td>${academy?`<button onclick="promote('${p.id}')">Povýšit</button>`:`<button onclick="sell('${p.id}')">Prodat</button>`}</td>
+  </tr>`).join("")+`</table>`;
+}
+function tableHTML(ts){
+  return `<table><tr><th>#</th><th>Klub</th><th>Z</th><th>V</th><th>R</th><th>P</th><th>Skóre</th><th>Body</th></tr>`+
+  ts.map((t,i)=>`<tr><td>${i+1}</td><td>${t.name===game.userClub?`<b>${t.name}</b>`:t.name}</td><td>${t.wins+t.draws+t.losses}</td><td>${t.wins}</td><td>${t.draws}</td><td>${t.losses}</td><td>${t.gf}:${t.ga}</td><td><b>${t.points}</b></td></tr>`).join("")+`</table>`;
+}
+function marketHTML(){
+  return `<table><tr><th>Jméno</th><th>Věk</th><th>Poz.</th><th>Síla</th><th>Potenciál</th><th>Cena</th><th>Akce</th></tr>`+
+  game.market.map(p=>`<tr><td>${p.name}</td><td>${p.age}</td><td>${p.position}</td><td>${p.strength}</td><td>${p.potential}</td><td>${money(p.value)}</td><td><button onclick="buy('${p.id}')">Koupit</button></td></tr>`).join("")+`</table>`;
+}
+function saveGame(show=true){localStorage.setItem("textFootballManagerSave",JSON.stringify(game)); if(show) addLog("Hra uložena.")}
+function loadGame(){const s=localStorage.getItem("textFootballManagerSave"); if(!s)return alert("Žádná uložená hra."); game=JSON.parse(s); render();}
+function resetGame(){if(confirm("Opravdu smazat uloženou hru?")){localStorage.removeItem("textFootballManagerSave");location.reload();}}
+fillClubSelect();
+</script>
+</body>
+</html>
