@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Fotbalový manažer 2.0</title>
+<style>
+:root{
+  --bg:#050816;
+  --bg-soft:#09162a;
+  --panel:#0d1b33;
+  --panel2:#122646;
+  --panel3:#17365f;
+  --text:#f3f8ff;
+  --muted:#a9bad4;
+  --green:#2cff88;
+  --blue:#33b8ff;
+  --purple:#9d7cff;
+  --gold:#ffd166;
+  --red:#ff5e75;
+  --line:rgba(187,211,255,.18);
+  --shadow:0 24px 70px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,system-ui,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 15% 4%, rgba(44,255,136,.23), transparent 28%),
+    radial-gradient(circle at 82% 0%, rgba(51,184,255,.22), transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(157,124,255,.16), transparent 34%),
+    linear-gradient(145deg,#050816 0%,#071224 45%,#08101d 100%);
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:42px 42px;
+  opacity:.7;
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:20;
+  padding:18px 18px 14px;
+  background:linear-gradient(180deg,rgba(5,8,22,.96),rgba(7,18,36,.88));
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+  box-shadow:0 14px 35px rgba(0,0,0,.42);
+}
+h1{
+  margin:0 0 14px;
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:.5px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-transform:uppercase;
+}
+h1:before{
+  content:"⚽";
+  width:50px;
+  height:50px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  color:#04110a;
+  box-shadow:0 0 35px rgba(44,255,136,.35);
+}
+h1:after{
+  content:"CAREER MODE";
+  font-size:11px;
+  color:#08111f;
+  background:linear-gradient(135deg,var(--gold),#fff4b0);
+  padding:5px 9px;
+  border-radius:999px;
+  margin-left:4px;
+}
+nav{
+  display:flex;
+  gap:9px;
+  overflow:auto;
+  padding:3px 1px 6px;
+}
+nav button{
+  font-size:13px;
+  padding:10px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.07);
+  color:var(--muted);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:none;
+}
+nav button.primary{
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  color:#03111d;
+  border:0;
+  font-weight:900;
+}
+main{
+  max-width:1450px;
+  margin:auto;
+  padding:20px;
+}
+button,select,input{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.045));
+  color:var(--text);
+  border-radius:14px;
+  padding:10px 13px;
+  outline:none;
+}
+select option{background:#10213d;color:var(--text)}
+button{
+  cursor:pointer;
+  transition:.18s ease;
+  font-weight:700;
+}
+button:hover{
+  transform:translateY(-2px);
+  border-color:rgba(44,255,136,.8);
+  box-shadow:0 14px 28px rgba(0,0,0,.28);
+}
+button:active{transform:translateY(0)}
+.primary{
+  background:linear-gradient(135deg,var(--green),#afff7d);
+  color:#03120a;
+  border:0;
+}
+.danger{
+  background:linear-gradient(135deg,var(--red),#ff9a7f);
+  color:#210408;
+  border:0;
+}
+.warnBtn{
+  background:linear-gradient(135deg,var(--gold),#fff2a3);
+  color:#231800;
+  border:0;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+  gap:16px;
+}
+.card{
+  position:relative;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.025)),
+    linear-gradient(180deg,var(--panel),#0b1730);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.card:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 0% 0%,rgba(44,255,136,.11),transparent 34%),
+    radial-gradient(circle at 100% 0%,rgba(51,184,255,.10),transparent 34%);
+}
+.card h2,.card h3{
+  position:relative;
+  margin-top:0;
+  margin-bottom:12px;
+}
+.card h2{
+  font-size:24px;
+}
+.card h3{
+  color:#dceaff;
+  font-size:18px;
+}
+.hidden{display:none}
+.small{font-size:13px;color:var(--muted)}
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 7px;
+  font-size:13px;
+}
+th{
+  color:var(--muted);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.55px;
+  padding:8px 9px;
+  text-align:left;
+}
+td{
+  padding:10px 9px;
+  text-align:left;
+  background:rgba(255,255,255,.055);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+td:first-child{border-left:1px solid rgba(255,255,255,.08);border-radius:14px 0 0 14px}
+td:last-child{border-right:1px solid rgba(255,255,255,.08);border-radius:0 14px 14px 0}
+tr:hover td{
+  background:rgba(51,184,255,.11);
+}
+.exp{
+  height:12px;
+  min-width:95px;
+  background:#040a14;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:999px;
+  overflow:hidden;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.55);
+}
+.exp div{
+  height:100%;
+  background:linear-gradient(90deg,var(--green),var(--blue),var(--purple));
+  box-shadow:0 0 15px rgba(44,255,136,.55);
+}
+.log{
+  white-space:pre-wrap;
+  max-height:430px;
+  overflow:auto;
+  line-height:1.6;
+  color:#e6f2ff;
+  background:rgba(0,0,0,.25);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+}
+.ok{color:var(--green)}
+.bad{color:var(--red)}
+.warn{color:var(--gold)}
+.badge{
+  display:inline-block;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:5px 9px;
+  color:var(--muted);
+  font-size:12px;
+  margin:2px;
+  background:rgba(255,255,255,.06);
+}
+#setup{
+  max-width:900px;
+  margin:42px auto;
+  padding:28px;
+  border-radius:30px;
+  background:
+    linear-gradient(135deg,rgba(44,255,136,.14),rgba(51,184,255,.10)),
+    linear-gradient(180deg,var(--panel2),var(--panel));
+}
+#setup h2{
+  font-size:36px;
+  margin-bottom:8px;
+}
+#game:before{
+  content:"MANAGER HUB";
+  display:block;
+  color:rgba(255,255,255,.26);
+  font-weight:900;
+  letter-spacing:3px;
+  margin:0 0 12px 4px;
+}
+#home .grid{
+  grid-template-columns:1.35fr 1fr 1fr;
+}
+#home .grid .card:first-child{
+  min-height:225px;
+  background:
+    linear-gradient(135deg,rgba(44,255,136,.25),rgba(51,184,255,.16)),
+    linear-gradient(180deg,#12355d,#0d1b33);
+}
+#home .grid .card:first-child:after{
+  content:"";
+  position:absolute;
+  right:-55px;
+  bottom:-55px;
+  width:210px;
+  height:210px;
+  border-radius:50%;
+  border:30px solid rgba(255,255,255,.055);
+}
+#clubName{
+  font-size:34px;
+  margin-bottom:10px;
+  text-shadow:0 0 24px rgba(44,255,136,.23);
+}
+#clubInfo,#nextMatchBox,#financeBox,#academyInfo,#scoutInfo,#stadiumBox,#trainingCenterBox,#fansBox{
+  line-height:1.75;
+  position:relative;
+}
+#clubInfo b,#financeBox b{
+  color:var(--green);
+  font-size:18px;
+}
+#nextMatchBox{
+  font-size:18px;
+}
+#media p,#historyBox p{
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:10px 12px;
+}
+.tab{animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--green),var(--blue));border-radius:999px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}
+@media(max-width:900px){
+  main{padding:12px}
+  header{padding:13px}
+  h1{font-size:22px}
+  h1:before{width:38px;height:38px;border-radius:14px}
+  h1:after{display:none}
+  #home .grid{grid-template-columns:1fr}
+  .card{padding:14px;border-radius:19px}
+  table{font-size:12px}
+  td,th{padding:8px 6px}
+  nav button{font-size:12px;padding:8px 10px}
+}
+
+/* --- MOBILNÍ OPRAVA 3.1 --- */
+.table-scroll{
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  border-radius:18px;
+}
+.table-scroll table{
+  min-width:760px;
+}
+.mobile-list{
+  display:none;
+}
+.player-card{
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  padding:12px;
+  margin:10px 0;
+}
+.player-card .top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.player-card .name{
+  font-weight:900;
+  font-size:16px;
+}
+.player-card .meta{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+.player-card .stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  margin:10px 0;
+}
+.player-card .stat{
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:8px;
+  font-size:13px;
+}
+.player-card .stat b{
+  display:block;
+  color:var(--green);
+  font-size:15px;
+}
+@media(max-width:760px){
+  body{overflow-x:hidden}
+  main{padding:10px}
+  header{padding:11px}
+  nav{gap:7px}
+  nav button{font-size:12px;padding:8px 9px}
+  .grid{grid-template-columns:1fr!important;gap:10px}
+  .card{padding:12px;border-radius:18px;margin-bottom:10px}
+  #clubName{font-size:25px}
+  .row{align-items:stretch}
+  .row button,.row select{flex:1 1 auto}
+  .desktop-table{display:none!important}
+  .mobile-list{display:block}
+  .table-scroll table{min-width:680px}
+  #lineupTable .table-scroll table,
+  #scheduleBox .table-scroll table,
+  #leagueTable .table-scroll table,
+  #worldLeagues .table-scroll table,
+  #coefficientsBox .table-scroll table{
+    min-width:620px;
+  }
+  #matchControlBox .row button{min-width:46%}
+}
+
+
+.backup-ok{
+  border:1px solid rgba(44,255,136,.25);
+  background:rgba(44,255,136,.08);
+  border-radius:16px;
+  padding:10px 12px;
+}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+
+.table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:18px}
+.table-scroll table{min-width:720px}
+.mobile-list{display:none}
+.player-card{background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:12px;margin:10px 0}
+.player-card .top{display:flex;justify-content:space-between;gap:10px}
+.player-card .name{font-weight:900;font-size:16px}.player-card .meta{color:var(--muted);font-size:13px;margin-top:3px}
+.player-card .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.player-card .stat{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px;font-size:13px}
+.player-card .stat b{display:block;color:var(--green);font-size:15px}
+@media(max-width:760px){
+ body{overflow-x:hidden} main{padding:10px} .grid{grid-template-columns:1fr!important}
+ .desktop-table{display:none!important}.mobile-list{display:block}
+ .table-scroll table{min-width:640px}
+ .row button,.row select{flex:1 1 auto}
+ #matchControlBox .row button{min-width:46%}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>Fotbalový manažer 2.0</h1>
+<nav>
+<button onclick="showTab('home')">🏠 Přehled</button><button onclick="showTab('squad')">👥 Hráči</button><button onclick="showTab('lineup')">📋 Sestava</button><button onclick="showTab('training')">🏋️ Trénink</button><button onclick="showTab('academy')">🌱 Akademie</button><button onclick="showTab('league')">🏆 Liga</button><button onclick="showTab('schedule')">🗓️ Rozpis</button><button onclick="showTab('matchControl')">🎮 Zápas</button><button onclick="showTab('cups')">🥇 Poháry</button><button onclick="showTab('market')">💰 Přestupy</button><button onclick="showTab('offers')">📨 Nabídky</button><button onclick="showTab('scouts')">🔎 Skauti</button><button onclick="showTab('club')">🏟️ Klub</button><button onclick="showTab('board')">👔 Vedení</button><button onclick="showTab('career')">📊 Kariéra</button><button onclick="showTab('coefficients')">🌐 Koeficienty</button><button onclick="showTab('media')">📰 Média</button><button onclick="showTab('world')">🌍 Svět</button><button onclick="showTab('history')">📚 Historie</button><button onclick="saveGame()">💾 Uložit</button><button onclick="exportGame()">📤 Export JSON</button><button onclick="document.getElementById('importFile').click()">📥 Import JSON</button>
+</nav><input id="importFile" type="file" accept="application/json,.json" style="display:none" onchange="importGame(event)">
+</header>
+<main>
+<section id="setup" class="card">
+<h2>Nová hra</h2>
+<p class="small">8 lig, domácí soutěže, evropské poháry, generovaní hráči, všichni začínají se silou 1.</p>
+<div class="row"><label>Liga:</label><select id="leagueSelect" onchange="fillClubSelect()"></select><label>Klub:</label><select id="clubSelect"></select><button class="primary" onclick="newGame()">Začít kariéru</button><button onclick="loadGame()">Načíst</button></div>
+</section>
+
+<section id="game" class="hidden">
+<section id="home" class="tab">
+<div class="grid">
+<div class="card hero-card"><h2 id="clubName"></h2><p id="clubInfo"></p><div class="row"><button class="primary" onclick="playNextMatch()">Rychle odehrát kolo</button><button onclick="startInteractiveMatch()">Hrát zápas</button><button onclick="nextSeason()">Ukončit sezonu</button></div></div>
+<div class="card"><h3>Další zápas</h3><p id="nextMatchBox"></p></div>
+<div class="card"><h3>Finance</h3><p id="financeBox"></p></div>
+</div>
+<div class="card"><h3>Události</h3><div id="log" class="log"></div></div>
+</section>
+
+<section id="squad" class="tab hidden"><div class="card"><h2>A-tým</h2><div id="squadTable"></div></div></section>
+
+<section id="lineup" class="tab hidden">
+<div class="grid">
+<div class="card"><h2>Sestava a taktika</h2><div class="row"><label>Rozestavení:</label><select id="formationSelect" onchange="setFormation(this.value)"></select><label>Taktika:</label><select id="tacticSelect" onchange="setTactic(this.value)"></select><button onclick="autoLineup()">Automatická sestava</button></div><p id="lineupInfo"></p></div>
+<div class="card"><h3>Role</h3><div class="row"><label>Kapitán:</label><select id="captainSelect" onchange="setRole('captain',this.value)"></select><label>Penalty:</label><select id="penaltySelect" onchange="setRole('penalty',this.value)"></select></div></div>
+</div>
+<div class="card"><h3>Základní jedenáctka</h3><div id="lineupTable"></div></div>
+</section>
+
+<section id="training" class="tab hidden"><div class="card"><h2>Trénink</h2><p class="small">Tvrdší trénink přidá více EXP, ale zvyšuje únavu a riziko zranění.</p><div class="row"><button onclick="trainTeam('light')">Lehký</button><button onclick="trainTeam('normal')">Normální</button><button onclick="trainTeam('hard')">Tvrdý</button></div></div></section>
+
+<section id="academy" class="tab hidden"><div class="card"><h2>Akademie</h2><p id="academyInfo"></p><div class="row"><button onclick="upgrade('academy')">Vylepšit akademii</button><button onclick="generateAcademyPlayer()">Najít talent</button><button onclick="playYouthTournament()">Dorostenecký turnaj</button></div><div id="academyTable"></div></div></section>
+
+<section id="league" class="tab hidden"><div class="card"><h2 id="leagueTitle"></h2><div id="leagueTable"></div></div></section>
+
+<section id="schedule" class="tab hidden"><div class="card"><h2>Rozpis zápasů</h2><div class="row"><label>Kolo:</label><select id="scheduleRoundSelect" onchange="renderSchedule()"></select></div><div id="scheduleBox"></div></div></section>
+
+<section id="cups" class="tab hidden"><div class="grid"><div class="card"><h2>Národní pohár</h2><div id="nationalCup"></div></div><div class="card"><h2>Evropské poháry</h2><div id="euroCups"></div></div></div></section>
+
+<section id="market" class="tab hidden"><div class="card"><h2>Přestupový trh</h2><div class="row"><button onclick="refreshMarket()">Obnovit trh</button><button onclick="addFreeAgents()">Volní hráči</button></div><div id="marketTable"></div></div></section>
+
+<section id="offers" class="tab hidden"><div class="card"><h2>Nabídky za hráče</h2><p class="small">Po ligových kolech mohou přicházet nabídky. Můžeš přijmout, odmítnout nebo vyjednávat.</p><div id="offersTable"></div></div></section>
+
+<section id="scouts" class="tab hidden"><div class="card"><h2>Skauti</h2><p id="scoutInfo"></p><div class="row"><button onclick="upgrade('scout')">Vylepšit skauting</button><button onclick="scout('Česká republika')">Česko</button><button onclick="scout('Evropa')">Evropa</button><button onclick="scout('Jižní Amerika')">Jižní Amerika</button><button onclick="scout('Afrika')">Afrika</button><button onclick="scout('Celý svět')">Celý svět</button></div><div id="scoutResults"></div></div></section>
+
+<section id="club" class="tab hidden"><div class="grid"><div class="card"><h2>Stadion</h2><p id="stadiumBox"></p><button onclick="upgrade('stadium')">Rozšířit stadion</button></div><div class="card"><h2>Tréninkové centrum</h2><p id="trainingCenterBox"></p><button onclick="upgrade('training')">Vylepšit centrum</button></div><div class="card"><h2>Fanoušci a reputace</h2><p id="fansBox"></p></div></div></section>
+
+<section id="board" class="tab hidden">
+<div class="grid">
+<div class="card"><h2>Vedení klubu</h2><p id="boardBox"></p><button onclick="requestMoreTime()">Požádat o důvěru</button></div>
+<div class="card"><h2>Cíl sezony</h2><p id="seasonObjectiveBox"></p></div>
+<div class="card"><h2>Stav manažera</h2><p id="managerStatusBox"></p></div>
+</div>
+</section>
+
+<section id="career" class="tab hidden">
+<div class="card"><h2>Statistiky kariéry</h2><div id="careerStatsBox"></div></div>
+</section>
+
+<section id="coefficients" class="tab hidden">
+<div class="card"><h2>Koeficienty lig</h2><p class="small">Od 2. sezony se počítají podle výsledků klubů v evropských pohárech. Podle pořadí koeficientu se určí počet míst v Lize mistrů, Evropské lize a Konferenční lize.</p><div id="coefficientsBox"></div></div>
+</section>
+
+<section id="matchControl" class="tab hidden">
+<div class="card"><h2>Interaktivní zápas</h2><div class="row"><button class="primary" onclick="startInteractiveMatch()">Spustit nejbližší zápas</button></div><br><div id="matchControlBox"></div></div>
+</section>
+
+<section id="media" class="tab hidden"><div class="card"><h2>Novinky</h2><div id="newsBox"></div></div></section>
+
+<section id="world" class="tab hidden"><div class="card"><h2>Ostatní ligy</h2><div id="worldLeagues"></div></div></section>
+
+<section id="history" class="tab hidden"><div class="card"><h2>Historie a rekordy</h2><div id="historyBox"></div><hr><h3>Zálohy</h3><div id="backupBox"></div><div class="row"><button onclick="exportGame()">Exportovat JSON</button><button onclick="document.getElementById('importFile').click()">Importovat JSON</button><button onclick="restoreAutoBackup()">Obnovit auto zálohu</button><button class="danger" onclick="resetGame()">Smazat uloženou hru</button></div></div></section>
+</section>
+</main>
+
+<script>
+const LEAGUES={
+"Česká liga":["AC Sparta Praha","SK Slavia Praha","FC Viktoria Plzeň","FC Baník Ostrava","FC Slovan Liberec","FK Jablonec","Bohemians Praha 1905","1. FC Slovácko","SK Sigma Olomouc","FK Mladá Boleslav","FC Hradec Králové","FK Teplice","FC Zlín","FK Dukla Praha","MFK Karviná","FK Pardubice"],
+"Anglická liga":["Manchester United","Liverpool FC","Arsenal FC","Chelsea FC","Manchester City","Tottenham Hotspur","Newcastle United","Aston Villa","Everton FC","West Ham United","Brighton & Hove Albion","Fulham FC","Crystal Palace","Wolverhampton Wanderers","Nottingham Forest","Leeds United"],
+"Španělská liga":["Real Madrid CF","FC Barcelona","Atlético Madrid","Valencia CF","Sevilla FC","Villarreal CF","Real Betis","Real Sociedad","Athletic Club","Celta Vigo","Getafe CF","CA Osasuna","RCD Mallorca","Espanyol Barcelona","Deportivo La Coruña","Real Zaragoza"],
+"Německá liga":["FC Bayern München","Borussia Dortmund","Bayer 04 Leverkusen","RB Leipzig","VfB Stuttgart","Eintracht Frankfurt","Borussia Mönchengladbach","Werder Bremen","VfL Wolfsburg","SC Freiburg","TSG Hoffenheim","1. FSV Mainz 05","FC Augsburg","1. FC Köln","Hamburger SV","Hertha BSC"],
+"Italská liga":["AC Milan","Inter Milan","Juventus FC","SSC Napoli","AS Roma","SS Lazio","Atalanta BC","ACF Fiorentina","Torino FC","Bologna FC","Genoa CFC","UC Sampdoria","Udinese Calcio","Parma Calcio","Cagliari Calcio","Palermo FC"],
+"Francouzská liga":["Paris Saint-Germain","Olympique Lyonnais","Olympique de Marseille","AS Monaco","LOSC Lille","Stade Rennais","OGC Nice","RC Lens","FC Nantes","Montpellier HSC","Toulouse FC","Girondins Bordeaux","AS Saint-Étienne","RC Strasbourg","AJ Auxerre","FC Metz"],
+"Nizozemská liga":["Ajax Amsterdam","PSV Eindhoven","Feyenoord Rotterdam","AZ Alkmaar","FC Twente","FC Utrecht","SC Heerenveen","Vitesse Arnhem","FC Groningen","Sparta Rotterdam","Heracles Almelo","PEC Zwolle","NEC Nijmegen","Willem II","NAC Breda","ADO Den Haag"],
+"Portugalská liga":["SL Benfica","FC Porto","Sporting CP","SC Braga","Vitória SC","Boavista FC","Rio Ave FC","GD Estoril Praia","CS Marítimo","CD Nacional","Gil Vicente FC","Moreirense FC","FC Famalicão","Portimonense SC","Académica Coimbra","Belenenses"]
+};
+const FIRST=["Jan","Tomáš","Petr","Lukáš","Martin","David","Adam","Filip","Matěj","Jakub","Ondřej","Václav","Marek","Daniel","Aleš","Roman","Milan","Patrik","Nicolas","Samuel","Erik","Dominik","Ivan","Marco","Luis","Kevin","Alex"];
+const LAST=["Novák","Svoboda","Dvořák","Černý","Procházka","Kučera","Veselý","Horák","Němec","Pokorný","Malý","Král","Urban","Beneš","Fiala","Sedláček","Navrátil","Kopecký","Bartoš","Vlček","Silva","Costa","Rossi","Müller","Garcia"];
+const POS=["BR","OB","OB","OB","ZA","ZA","ZA","ZA","KŘ","KŘ","ÚT"];
+const FORMATIONS={"4-4-2":["BR","OB","OB","OB","OB","ZA","ZA","ZA","ZA","ÚT","ÚT"],"4-3-3":["BR","OB","OB","OB","OB","ZA","ZA","ZA","KŘ","KŘ","ÚT"],"4-2-3-1":["BR","OB","OB","OB","OB","ZA","ZA","KŘ","KŘ","KŘ","ÚT"],"3-5-2":["BR","OB","OB","OB","ZA","ZA","ZA","KŘ","KŘ","ÚT","ÚT"],"5-3-2":["BR","OB","OB","OB","OB","OB","ZA","ZA","ZA","ÚT","ÚT"]};
+const TACTICS={"Velmi útočná":{atk:1.22,def:.82,fat:1.25},"Útočná":{atk:1.12,def:.92,fat:1.12},"Vyvážená":{atk:1,def:1,fat:1},"Defenzivní":{atk:.9,def:1.12,fat:.92},"Velmi defenzivní":{atk:.78,def:1.25,fat:.86}};
+let game=null;
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}function pick(a){return a[Math.floor(Math.random()*a.length)]}function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}function money(n){return Math.round(n).toLocaleString("cs-CZ")+" Kč"}function name(){return pick(FIRST)+" "+pick(LAST)}
+function salary(p){return 800+p.strength*380+Math.max(0,28-p.age)*25+Math.round(p.potential*18)}function value(p){return p.strength*13000+p.potential*6500+Math.max(0,26-p.age)*2500}
+function makePlayer(a=18,b=34,academy=false){let p={id:id(),name:name(),age:rnd(a,b),position:pick(POS),strength:1,potential:rnd(8,35),exp:0,expToNext:100,injured:0,goals:0,assists:0,matches:0,rating:6,morale:70,fitness:100,fatigue:0,contract:rnd(1,5),history:[],listed:false,academy};p.salary=academy?0:salary(p);p.value=value(p);return p}
+function makeTeam(n,l){let ps=[];for(let i=0;i<22;i++)ps.push(makePlayer());return{name:n,leagueName:l,players:ps,points:0,gf:0,ga:0,wins:0,draws:0,losses:0,coefficient:1}}
+function genSchedule(names){let teams=[...names],n=teams.length,fh=[],fixed=teams[0],others=teams.slice(1);for(let r=0;r<n-1;r++){let rot=others.slice(r).concat(others.slice(0,r));let pairs=[[fixed,rot[0]]];for(let i=1;i<n/2;i++)pairs.push([rot[i],rot[rot.length-i]]);if(r%2)pairs=pairs.map(([h,a])=>[a,h]);fh.push(pairs.map(([home,away])=>({home,away,played:false,score:null,detail:""})))}return fh.concat(fh.map(ro=>ro.map(m=>({home:m.away,away:m.home,played:false,score:null,detail:""}))))}
+function makeLeague(l){return{name:l,teams:LEAGUES[l].map(c=>makeTeam(c,l)),schedule:genSchedule(LEAGUES[l]),champions:[]}}
+
+const COUNTRY_BY_LEAGUE={
+  "Česká liga":"Česko","Anglická liga":"Anglie","Španělská liga":"Španělsko","Německá liga":"Německo",
+  "Italská liga":"Itálie","Francouzská liga":"Francie","Nizozemská liga":"Nizozemsko","Portugalská liga":"Portugalsko"
+};
+function objectiveForClub(club,league){
+  const elite=["AC Sparta Praha","SK Slavia Praha","FC Viktoria Plzeň","Manchester United","Liverpool FC","Arsenal FC","Chelsea FC","Manchester City","Real Madrid CF","FC Barcelona","Atlético Madrid","FC Bayern München","Borussia Dortmund","Bayer 04 Leverkusen","AC Milan","Inter Milan","Juventus FC","SSC Napoli","Paris Saint-Germain","Ajax Amsterdam","PSV Eindhoven","Feyenoord Rotterdam","SL Benfica","FC Porto","Sporting CP"];
+  const strong=["FC Baník Ostrava","FC Slovan Liberec","FK Jablonec","Newcastle United","Aston Villa","Sevilla FC","Villarreal CF","RB Leipzig","AS Roma","SS Lazio","AS Monaco","Olympique Lyonnais","Olympique de Marseille","SC Braga"];
+  if(elite.includes(club))return {text:"Boj o titul",target:3,pressure:78};
+  if(strong.includes(club))return {text:"Umístění v top 6",target:6,pressure:62};
+  return {text:"Udržení v lize",target:12,pressure:45};
+}
+function defaultEuroSlots(rank){
+  if(rank<=2)return {cl:4,el:2,ecl:1};
+  if(rank<=4)return {cl:3,el:2,ecl:1};
+  if(rank<=6)return {cl:2,el:2,ecl:1};
+  return {cl:1,el:1,ecl:2};
+}
+function getLeagueCoefficientTable(){
+  if(!game.coefficients){
+    game.coefficients={};
+    Object.keys(LEAGUES).forEach(l=>game.coefficients[l]={points:0,history:[],slots:defaultEuroSlots(8)});
+  }
+  const arr=Object.entries(game.coefficients).map(([league,data])=>({league,...data}));
+  arr.sort((a,b)=>b.points-a.points);
+  arr.forEach((x,i)=>x.slots=defaultEuroSlots(i+1));
+  return arr;
+}
+function updateCoefficientSlots(){
+  const arr=getLeagueCoefficientTable();
+  arr.forEach((row,i)=>{game.coefficients[row.league].slots=defaultEuroSlots(i+1)});
+}
+function qualifyEuroTeams(){
+  updateCoefficientSlots();
+  game.euroCompetitions={season:game.season,active:true,round:0,last:"Evropské poháry jsou připravené.",competitions:{cl:[],el:[],ecl:[]},results:[]};
+  game.leagues.forEach(l=>{
+    const slots=game.coefficients[l.name]?.slots || defaultEuroSlots(8);
+    const table=standings(l);
+    table.slice(0,slots.cl).forEach(t=>game.euroCompetitions.competitions.cl.push({team:t.name,league:l.name,alive:true,points:0}));
+    table.slice(slots.cl,slots.cl+slots.el).forEach(t=>game.euroCompetitions.competitions.el.push({team:t.name,league:l.name,alive:true,points:0}));
+    table.slice(slots.cl+slots.el,slots.cl+slots.el+slots.ecl).forEach(t=>game.euroCompetitions.competitions.ecl.push({team:t.name,league:l.name,alive:true,points:0}));
+  });
+}
+function euroName(key){return key==="cl"?"Liga mistrů":key==="el"?"Evropská liga":"Konferenční liga"}
+function simulateEuroRound(){
+  if(!game.euroCompetitions?.active)return;
+  game.euroCompetitions.round++;
+  ["cl","el","ecl"].forEach(key=>{
+    let comp=game.euroCompetitions.competitions[key].filter(x=>x.alive);
+    if(comp.length<2)return;
+    comp.sort(()=>Math.random()-.5);
+    const survivors=[];
+    for(let i=0;i<comp.length;i+=2){
+      const a=comp[i],b=comp[i+1];
+      if(!b){survivors.push(a);continue}
+      const ta=allTeams().find(t=>t.name===a.team)||makeTeam(a.team,a.league);
+      const tb=allTeams().find(t=>t.name===b.team)||makeTeam(b.team,b.league);
+      const pa=teamPower(ta,ta.name===game.userClub)+Math.random()*5;
+      const pb=teamPower(tb,tb.name===game.userClub)+Math.random()*5;
+      const win=pa>=pb?a:b, lose=pa>=pb?b:a;
+      win.points+=3;
+      if(game.coefficients[win.league])game.coefficients[win.league].points+=3;
+      if(game.coefficients[lose.league])game.coefficients[lose.league].points+=1;
+      lose.alive=false;
+      survivors.push(win);
+      const line=`${euroName(key)}: ${win.team} postupuje přes ${lose.team}.`;
+      game.euroCompetitions.results.unshift(line);
+      if(win.team===game.userClub||lose.team===game.userClub){
+        addNews(line);
+        game.money += win.team===game.userClub ? 90000 : 35000;
+      }
+    }
+  });
+  updateCoefficientSlots();
+}
+function getQualificationLabel(pos,leagueName){
+  const slots=game.coefficients?.[leagueName]?.slots || defaultEuroSlots(8);
+  if(pos<=slots.cl)return '<span class="badge" style="color:#2cff88">Liga mistrů</span>';
+  if(pos<=slots.cl+slots.el)return '<span class="badge" style="color:#33b8ff">Evropská liga</span>';
+  if(pos<=slots.cl+slots.el+slots.ecl)return '<span class="badge" style="color:#ffd166">Konferenční liga</span>';
+  return '';
+}
+function startInteractiveMatch(){
+  try{
+    if(!game){alert("Nejdřív začni nebo načti hru.");return;}
+    if(game.liveMatch && game.liveMatch.phase!=="finished"){showTab("matchControl");return;}
+    const found=getNextUserMatch();
+    if(!found){
+      safeMsg("Nenašel jsem žádný neodehraný zápas tvého klubu. Pokud je sezona dohraná, ukonči sezonu.");
+      return;
+    }
+    if(found.roundIndex !== game.round-1){
+      game.round = found.roundIndex + 1;
+      addLog("Přeskočeno na nejbližší dostupný zápas: kolo "+game.round+".");
+    }
+    const m=found.match;
+    game.liveMatch={
+      home:m.home,away:m.away,minute:0,homeGoals:0,awayGoals:0,phase:"first",
+      events:[`Zápas připraven: ${m.home} vs ${m.away}`]
+    };
+    showTab("matchControl");
+  }catch(err){
+    console.error(err);
+    alert("Zápas se nepodařilo spustit: "+err.message);
+  }
+}
+function playLiveHalf(){
+  try{
+    if(!game.liveMatch){startInteractiveMatch();return;}
+    const lm=game.liveMatch;
+    if(lm.phase==="finished"){render();return;}
+    const home=userLeague().teams.find(t=>t.name===lm.home);
+    const away=userLeague().teams.find(t=>t.name===lm.away);
+    if(!home||!away){alert("Chybí tým zápasu.");return;}
+    const userHome=lm.home===game.userClub, userAway=lm.away===game.userClub;
+    const tac=TACTICS[game.lineup.tactic] || TACTICS["Vyvážená"];
+    const hp=Math.max(1,teamPower(home,userHome)*(userHome?tac.atk:1));
+    const ap=Math.max(1,teamPower(away,userAway)*(userAway?tac.atk:1));
+    const from=lm.minute+1,to=lm.minute===0?45:90;
+    for(let min=from;min<=to;min+=rnd(5,12)){
+      if(Math.random()<.46){
+        const side=Math.random()<hp/(hp+ap)?"home":"away";
+        if(Math.random()<.30){
+          if(side==="home")lm.homeGoals++;else lm.awayGoals++;
+          lm.events.push(`${min}. minuta: GÓL! ${side==="home"?lm.home:lm.away}`);
+        }else{
+          lm.events.push(`${min}. minuta: šance týmu ${side==="home"?lm.home:lm.away}`);
+        }
+      }
+    }
+    lm.minute=to;
+    lm.phase=to===45?"half":"finished";
+    if(lm.phase==="finished")finishLiveMatch();
+    render();
+  }catch(err){
+    console.error(err);
+    alert("Chyba při odehrání poločasu: "+err.message);
+  }
+}
+function changeLiveTactic(tac){game.lineup.tactic=tac;addLog("Změna taktiky během zápasu: "+tac);render()}
+function finishLiveMatch(){
+  const lm=game.liveMatch;
+  if(!lm || lm.saved)return;
+  const league=userLeague();
+  const a=league.teams.find(t=>t.name===lm.home),b=league.teams.find(t=>t.name===lm.away);
+  if(!a||!b)return;
+  a.gf+=lm.homeGoals;a.ga+=lm.awayGoals;b.gf+=lm.awayGoals;b.ga+=lm.homeGoals;
+  if(lm.homeGoals>lm.awayGoals){a.points+=3;a.wins++;b.losses++}
+  else if(lm.awayGoals>lm.homeGoals){b.points+=3;b.wins++;a.losses++}
+  else{a.points++;b.points++;a.draws++;b.draws++}
+  const round=league.schedule[game.round-1]||[];
+  const m=round.find(x=>x.home===lm.home&&x.away===lm.away);
+  if(m){m.played=true;m.score=`${lm.homeGoals}:${lm.awayGoals}`;m.detail=lm.events.join("\n");}
+  const result=`${lm.home} ${lm.homeGoals}:${lm.awayGoals} ${lm.away}`;
+  addNews("Interaktivní zápas dohrán: "+result);
+  if(!game.career)game.career={matches:0,wins:0,draws:0,losses:0,trophies:0,seasons:0};
+  game.career.matches++;
+  if((lm.home===game.userClub&&lm.homeGoals>lm.awayGoals)||(lm.away===game.userClub&&lm.awayGoals>lm.homeGoals))game.career.wins++;
+  else if(lm.homeGoals===lm.awayGoals)game.career.draws++;
+  else game.career.losses++;
+  lm.saved=true;
+}
+function continueAfterLiveMatch(){
+  try{
+    if(!game.liveMatch||game.liveMatch.phase!=="finished")return;
+    // Dohraj zbytek stejného kola v uživatelově lize.
+    const round=userLeague().schedule[game.round-1]||[];
+    round.forEach(m=>{
+      if(!m.played){
+        let a=userLeague().teams.find(t=>t.name===m.home),b=userLeague().teams.find(t=>t.name===m.away);
+        let r=sim(a,b,true);m.played=true;m.score=r.score;m.detail=r.detail;
+      }
+    });
+    // Dohraj ostatní ligy pro stejné kolo.
+    game.leagues.filter(l=>l.name!==game.userLeague).forEach(l=>playLeagueRound(l,false));
+    allTeams().forEach(t=>t.players.forEach(p=>{if(p.injured>0)p.injured--;p.fatigue=Math.max(0,p.fatigue-12);p.fitness=Math.min(100,100-p.fatigue)}));
+    cups();if(game.euroCompetitions&&game.round%4===0)simulateEuroRound();monthly();maybeOffer();
+    game.round++;
+    game.liveMatch=null;
+    saveGame(false);
+    showTab("home");
+  }catch(err){
+    console.error(err);
+    alert("Chyba při pokračování po zápase: "+err.message);
+  }
+}
+function boardTrustChange(pos){
+  const target=game.board?.objective?.target || 12;
+  if(pos<=target)game.board.trust=Math.min(100,game.board.trust+8);
+  else game.board.trust=Math.max(0,game.board.trust-(pos-target)*7);
+  if(game.board.trust<20){
+    game.board.warnings++;
+    addNews("Vedení je velmi nespokojené. Varování číslo "+game.board.warnings+".");
+  }
+  if(game.board.warnings>=3){
+    addNews("Vedení tě odvolalo, ale hra pokračuje jako volná kariéra. Vyber si nový klub v budoucí verzi.");
+    game.board.trust=45;game.board.warnings=0;
+  }
+}
+function requestMoreTime(){
+  if(Math.random()<.55){game.board.trust=Math.min(100,game.board.trust+12);addNews("Vedení ti dalo více času.")}
+  else{game.board.trust=Math.max(0,game.board.trust-6);addNews("Vedení žádost nepřijalo.")}
+  render();
+}
+
+function fillLeagueSelect(){leagueSelect.innerHTML=Object.keys(LEAGUES).map(l=>`<option>${l}</option>`).join("");fillClubSelect()}function fillClubSelect(){clubSelect.innerHTML=LEAGUES[leagueSelect.value||Object.keys(LEAGUES)[0]].map(c=>`<option>${c}</option>`).join("")}
+function newGame(){game={season:1,round:1,userLeague:leagueSelect.value,userClub:clubSelect.value,money:700000,reputation:1,fans:3000,stadium:5000,academyLevel:1,trainingLevel:1,scoutLevel:1,staffLevel:1,sponsor:60000,offers:[],market:[],scoutFound:[],academy:[],news:[],log:[],history:[],hall:[],records:{biggestWin:"-",sale:0,buy:0,goals:0},leagues:Object.keys(LEAGUES).map(makeLeague),career:{matches:0,wins:0,draws:0,losses:0,trophies:0,seasons:0},board:{president:"Prezident "+pick(LAST),trust:70,warnings:0,objective:objectiveForClub(clubSelect.value,leagueSelect.value)},stadiumName:"Stadion "+clubSelect.value,euroCompetitions:null,coefficients:Object.fromEntries(Object.keys(LEAGUES).map(l=>[l,{points:0,history:[],slots:defaultEuroSlots(8)}])),lineup:{formation:"4-4-2",tactic:"Vyvážená",starters:[],bench:[],captain:null,penalty:null},euro:{qualified:false,competition:"",last:"Do Evropy se lze kvalifikovat dobrým umístěním v lize."},cup:{last:"Národní pohár ještě nezačal."}};for(let i=0;i<6;i++)generateAcademyPlayer(false);refreshMarket(false);autoLineup(false);addNews("Začíná nová kariéra v klubu "+game.userClub+".");game.saveVersion=SAVE_VERSION;addLog("Nová hra vytvořena.");saveGame(false);saveAutoBackup("new-game");render()}
+function userLeague(){return game.leagues.find(l=>l.name===game.userLeague)}function userTeam(){return userLeague().teams.find(t=>t.name===game.userClub)}function allTeams(){return game.leagues.flatMap(l=>l.teams)}function starters(){let t=userTeam();return game.lineup.starters.map(id=>t.players.find(p=>p.id===id)).filter(Boolean)}
+function posFactor(p,slot){return p.position===slot?1:(p.position==="KŘ"&&slot==="ÚT")||(p.position==="ÚT"&&slot==="KŘ")?.9:.72}
+function teamPower(t,forUser=false){let ps;if(forUser&&t.name===game.userClub&&game.lineup.starters.length===11){ps=starters();return ps.reduce((s,p,i)=>s+p.strength*posFactor(p,FORMATIONS[game.lineup.formation][i])*(p.fitness/100)*(p.morale/100+.35),0)}ps=t.players.filter(p=>p.injured<=0).sort((a,b)=>b.strength-a.strength).slice(0,11);return ps.reduce((s,p)=>s+p.strength*(p.fitness/100)*(p.morale/100+.35),0)}
+function addExp(p,amt){if(p.age<=21)amt*=1.35;amt*=1+p.potential/100;amt*=1+(game.trainingLevel||1)*.03;p.exp+=Math.round(amt);while(p.exp>=p.expToNext&&p.strength<p.potential){p.exp-=p.expToNext;p.strength++;p.expToNext=Math.round(p.expToNext*1.18);p.salary=salary(p);p.value=value(p);addNews(p.name+" se zlepšil na sílu "+p.strength+".")}}
+function sim(a,b,official=true){let userA=a.name===game.userClub,userB=b.name===game.userClub,tac=TACTICS[game.lineup.tactic],pa=teamPower(a,userA),pb=teamPower(b,userB);let atkA=pa*(userA?tac.atk:1),defA=pa*(userA?tac.def:1),atkB=pb*(userB?tac.atk:1),defB=pb*(userB?tac.def:1);let ag=Math.max(0,Math.round(Math.random()*2+atkA/(defB+1)*1.2-.3));let bg=Math.max(0,Math.round(Math.random()*2+atkB/(defA+1)*1.2-.3));if(official){a.gf+=ag;a.ga+=bg;b.gf+=bg;b.ga+=ag;if(ag>bg){a.points+=3;a.wins++;b.losses++}else if(bg>ag){b.points+=3;b.wins++;a.losses++}else{a.points++;b.points++;a.draws++;b.draws++}}let detail=[];for(let m of [12,24,37,51,68,82])if(Math.random()<.45)detail.push(`${m}. minuta: ${pick(["šance","roh","střela z dálky","rychlý protiútok"])} týmu ${Math.random()<.5?a.name:b.name}.`);[[a,ag,userA],[b,bg,userB]].forEach(([t,g,isU])=>{let use=isU&&game.lineup.starters.length===11?starters():t.players.filter(p=>p.injured<=0).sort((x,y)=>y.strength-x.strength).slice(0,11);use.forEach(p=>{p.matches++;p.rating=Number((5.5+Math.random()*2+g*.25).toFixed(1));addExp(p,rnd(8,18)+g*4);p.fatigue=Math.min(100,p.fatigue+rnd(8,18)*(isU?tac.fat:1));p.fitness=Math.max(40,100-p.fatigue);p.morale=Math.max(5,Math.min(100,p.morale+(g>0?rnd(1,4):rnd(-3,1))));if(Math.random()<.02*(isU?tac.fat:1)){p.injured=rnd(1,8);addNews(p.name+" se zranil na "+p.injured+" kol.")}});for(let i=0;i<g;i++){let s=pick(use);s.goals++;if(s.goals>game.records.goals)game.records.goals=s.goals}});let res=`${a.name} ${ag}:${bg} ${b.name}`;if((ag-bg)>=5||(bg-ag)>=5)game.records.biggestWin=res;return{res,score:`${ag}:${bg}`,detail:detail.join("\n")||"Zápas byl bojovný, ale bez větších momentů."}}
+function playLeagueRound(l,log=false){let round=l.schedule[game.round-1];if(!round)return;round.forEach(m=>{if(m.played)return;let a=l.teams.find(t=>t.name===m.home),b=l.teams.find(t=>t.name===m.away),r=sim(a,b,true);m.played=true;m.score=r.score;m.detail=r.detail;if(log&&(m.home===game.userClub||m.away===game.userClub)){addLog(`${l.name}, kolo ${game.round}: ${r.res}\n${r.detail}`);addNews("Výsledek kola: "+r.res)}})}
+function playNextMatch(){if(game.liveMatch){addLog("Nejdřív dokonči rozehraný interaktivní zápas.");showTab("matchControl");return}if(game.round>30){addLog("Liga je dohraná. Ukonči sezonu.");render();return}allTeams().forEach(t=>t.players.forEach(p=>{if(p.injured>0)p.injured--;p.fatigue=Math.max(0,p.fatigue-12);p.fitness=Math.min(100,100-p.fatigue)}));game.leagues.forEach(l=>playLeagueRound(l,l.name===game.userLeague));game.career.matches++;cups();if(game.euroCompetitions&&game.round%4===0)simulateEuroRound();monthly();maybeOffer();game.round++;saveGame(false);render()}
+function cups(){if(game.round%5===0){let opp=pick(userLeague().teams.filter(t=>t.name!==game.userClub)),r=sim(userTeam(),opp,false);game.cup.last="Národní pohár: "+r.res;addLog(game.cup.last)}if(game.euro.qualified&&game.round%4===0){let opp=pick(game.leagues.filter(l=>l.name!==game.userLeague).flatMap(l=>standings(l).slice(0,4))),r=sim(userTeam(),opp,false);game.euro.last=game.euro.competition+": "+r.res;game.money+=45000;game.reputation+=.06;addNews("Evropský zápas: "+r.res)}}
+function monthly(){if(game.round%4)return;let wages=userTeam().players.reduce((s,p)=>s+p.salary,0),tickets=Math.round(game.stadium*.45*70*(game.reputation+.5));game.money+=game.sponsor+tickets-wages;addLog(`Finance: sponzor ${money(game.sponsor)}, vstupné ${money(tickets)}, mzdy ${money(wages)}.`)}
+function standings(l=userLeague()){return[...l.teams].sort((a,b)=>b.points-a.points||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf)}
+function nextSeason(){let pos=standings().findIndex(t=>t.name===game.userClub)+1;game.history.unshift(`Sezona ${game.season}: ${game.userClub} ${pos}. místo v soutěži ${game.userLeague}.`);game.career.seasons++;boardTrustChange(pos);game.money+=Math.max(70000,(17-pos)*30000);game.fans+=Math.max(-500,(9-pos)*250);game.reputation+=Math.max(-.1,(6-pos)*.05);qualifyEuroTeams();game.euro.qualified=pos<=5;game.euro.competition=pos===1?"Liga mistrů":pos<=3?"Evropská liga":"Konferenční liga";Object.keys(game.coefficients).forEach(l=>game.coefficients[l].history.unshift(`Sezona ${game.season}: ${game.coefficients[l].points} bodů`));game.leagues.forEach(l=>{l.champions.unshift(`Sezona ${game.season}: ${standings(l)[0].name}`);resetLeague(l)});userTeam().players=userTeam().players.filter(p=>{p.age++;p.contract--;if(p.contract<=0&&Math.random()<.35){addNews(p.name+" odešel zdarma po konci smlouvy.");return false}if(p.age>33&&Math.random()<.25)p.strength=Math.max(1,p.strength-1);if(p.age>37||(p.age>34&&Math.random()<.08)){game.hall.unshift(`${p.name} ukončil kariéru. Zápasy ${p.matches}, góly ${p.goals}.`);return false}return true});while(userTeam().players.length<22)userTeam().players.push(makePlayer(18,22,false));game.season++;game.round=1;game.offers=[];game.leagues.forEach(l=>l.teams.forEach(t=>t.players.forEach(p=>{p.goals=0;p.assists=0;p.matches=0;p.injured=0;p.fatigue=0;p.fitness=100})));autoLineup(false);saveGame(false);render()}
+function resetLeague(l){l.teams.forEach(t=>{t.points=0;t.gf=0;t.ga=0;t.wins=0;t.draws=0;t.losses=0});l.schedule=genSchedule(l.teams.map(t=>t.name))}
+function autoLineup(r=true){let t=userTeam(),slots=FORMATIONS[game.lineup.formation],chosen=[];slots.forEach(slot=>{let cand=t.players.filter(p=>!chosen.includes(p.id)&&p.injured<=0).sort((a,b)=>b.strength*posFactor(b,slot)-a.strength*posFactor(a,slot))[0];if(cand)chosen.push(cand.id)});game.lineup.starters=chosen;game.lineup.bench=t.players.filter(p=>!chosen.includes(p.id)).sort((a,b)=>b.strength-a.strength).slice(0,7).map(p=>p.id);game.lineup.captain=chosen[0]||null;game.lineup.penalty=chosen[10]||chosen[0]||null;if(r)render()}
+function setFormation(v){game.lineup.formation=v;autoLineup()}function setTactic(v){game.lineup.tactic=v;render()}function setRole(k,v){game.lineup[k]=v;saveGame(false)}
+function trainTeam(type){let mult={light:7,normal:14,hard:24}[type],risk={light:.005,normal:.015,hard:.04}[type];userTeam().players.forEach(p=>{addExp(p,mult);p.fatigue=Math.min(100,p.fatigue+mult/2);p.fitness=Math.max(40,100-p.fatigue);if(Math.random()<risk){p.injured=rnd(1,5)}});addLog("Proběhl "+type+" trénink.");render()}
+function generateAcademyPlayer(r=true){let p=makePlayer(15,18,true);p.potential+=game.academyLevel*3;p.expToNext=80;game.academy.push(p);if(r){addNews("Akademie našla talent: "+p.name);render()}}
+function promote(pid){let p=game.academy.find(x=>x.id===pid);if(!p)return;p.academy=false;p.salary=salary(p);p.value=value(p);p.contract=3;userTeam().players.push(p);game.academy=game.academy.filter(x=>x.id!==pid);addNews(p.name+" povýšil do A-týmu.");autoLineup(false);render()}
+function playYouthTournament(){game.academy.forEach(p=>addExp(p,rnd(15,35)));if(Math.random()<.5)generateAcademyPlayer(false);addNews("Akademie odehrála turnaj a talenty získaly EXP.");render()}
+function refreshMarket(r=true){game.market=[];for(let i=0;i<12;i++){let p=makePlayer(18,32,false);p.potential+=rnd(0,15);p.value=value(p);game.market.push(p)}if(r)render()}function addFreeAgents(){for(let i=0;i<5;i++){let p=makePlayer(20,34,false);p.value=Math.round(p.value*.55);game.market.unshift(p)}render()}
+function buy(pid){let p=game.market.find(x=>x.id===pid);if(!p)return;if(game.money<p.value)return addLog("Na hráče nemáš peníze.");game.money-=p.value;p.history.push("Přestup do "+game.userClub);userTeam().players.push(p);game.records.buy=Math.max(game.records.buy,p.value);game.market=game.market.filter(x=>x.id!==pid);addNews("Koupen hráč "+p.name+" za "+money(p.value)+".");autoLineup(false);render()}
+function sell(pid,price=None){let t=userTeam(),p=t.players.find(x=>x.id===pid);if(!p||t.players.length<=14)return;let val=price||p.value;game.money+=val;game.records.sale=Math.max(game.records.sale,val);t.players=t.players.filter(x=>x.id!==pid);game.offers=game.offers.filter(o=>o.playerId!==pid);addNews("Prodán hráč "+p.name+" za "+money(val)+".");autoLineup(false);render()}
+function maybeOffer(){if(Math.random()>.38)return;let p=pick(userTeam().players.filter(x=>x.strength>=1));let buyer=pick(allTeams().filter(t=>t.name!==game.userClub));let amount=Math.round(p.value*(.75+Math.random()*.65));game.offers.unshift({id:id(),playerId:p.id,player:p.name,buyer:buyer.name,amount});addNews(`${buyer.name} nabízí ${money(amount)} za hráče ${p.name}.`)}
+function acceptOffer(oid){let o=game.offers.find(x=>x.id===oid);if(o)sell(o.playerId,o.amount)}function rejectOffer(oid){game.offers=game.offers.filter(o=>o.id!==oid);render()}function negotiateOffer(oid){let o=game.offers.find(x=>x.id===oid);if(!o)return;if(Math.random()<.55){o.amount=Math.round(o.amount*1.18);addNews(o.buyer+" zvýšil nabídku na "+money(o.amount)+".")}else{addNews(o.buyer+" ukončil jednání.");rejectOffer(oid);return}render()}
+function scout(region){let cost={["Česká republika"]:25000,Evropa:60000,["Jižní Amerika"]:85000,Afrika:75000,["Celý svět"]:120000}[region];if(game.money<cost)return addLog("Na scouting nemáš peníze.");game.money-=cost;let count=2+game.scoutLevel;game.scoutFound=[];for(let i=0;i<count;i++){let p=makePlayer(16,28,false);p.potential+=game.scoutLevel*4+(region==="Celý svět"?5:0);p.value=value(p);game.scoutFound.push(p)}addNews("Skauti dokončili hledání: "+region+".");render()}
+function signScout(pid){let p=game.scoutFound.find(x=>x.id===pid);if(!p)return;if(game.money<p.value)return addLog("Nemáš dost peněz.");game.money-=p.value;userTeam().players.push(p);game.scoutFound=game.scoutFound.filter(x=>x.id!==pid);addNews("Podepsán skautovaný hráč "+p.name+".");autoLineup(false);render()}
+function upgrade(type){let costs={academy:game.academyLevel*140000,scout:game.scoutLevel*130000,stadium:game.stadium*25,training:game.trainingLevel*160000};let c=costs[type];if(game.money<c)return addLog("Nedostatek peněz.");game.money-=c;if(type==="academy")game.academyLevel++;if(type==="scout")game.scoutLevel++;if(type==="stadium")game.stadium+=1500;if(type==="training")game.trainingLevel++;addNews("Vylepšení dokončeno: "+type+".");render()}
+function negotiateSponsor(){game.sponsor=Math.round(60000+game.reputation*45000+game.fans*4);addNews("Nová sponzorská smlouva: "+money(game.sponsor)+" měsíčně.");render()}
+function addNews(t){game.news.unshift(t);game.news=game.news.slice(0,80);addLog(t)}function addLog(t){game.log.unshift(t);game.log=game.log.slice(0,100)}
+function showTab(id){document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll("nav button").forEach(b=>b.classList.remove("primary"));[...document.querySelectorAll("nav button")].find(b=>b.getAttribute("onclick")&&b.getAttribute("onclick").includes("\'"+id+"\'"))?.classList.add("primary");render()}
+function xp(p){return Math.min(100,Math.round(p.exp/p.expToNext*100))}
+
+function wrapTable(html){
+  return `<div class="table-scroll">${html}</div>`;
+}
+
+function wrapTable(html){return `<div class="table-scroll">${html}</div>`;}
+function safeMsg(msg){try{addLog(msg);render();}catch(e){alert(msg);}}
+function getNextUserMatch(){
+  if(!game || !userLeague())return null;
+  const schedule=userLeague().schedule || [];
+  for(let r=Math.max(0,(game.round||1)-1); r<schedule.length; r++){
+    const match=(schedule[r]||[]).find(m=>!m.played && (m.home===game.userClub || m.away===game.userClub));
+    if(match)return {match,roundIndex:r};
+  }
+  return null;
+}
+function playerCards(ps,type){
+  return `<div class="mobile-list">${ps.map(p=>`
+    <div class="player-card">
+      <div class="top"><div><div class="name">${p.name}</div><div class="meta">${p.age} let | ${p.position} | ${p.injured>0?"Zraněn "+p.injured+" kol":"OK"}</div></div><div class="badge">SÍLA ${p.strength}</div></div>
+      <div class="stats">
+        <div class="stat">Potenciál <b>${p.potential}</b></div><div class="stat">Kondice <b>${p.fitness}%</b></div>
+        <div class="stat">Morálka <b>${p.morale}%</b></div><div class="stat">Smlouva <b>${p.contract}</b></div>
+        <div class="stat">Plat <b>${money(p.salary)}</b></div><div class="stat">Cena <b>${money(p.value)}</b></div>
+      </div>
+      <div class="exp"><div style="width:${xp(p)}%"></div></div><div class="small">EXP ${p.exp}/${p.expToNext}</div>
+      <div style="margin-top:10px">${type==="academy"?`<button onclick="promote('${p.id}')">Povýšit</button>`:type==="team"?`<button onclick="sell('${p.id}')">Prodat</button>`:""}</div>
+    </div>`).join("")}</div>`;
+}
+function render(){if(!game)return;setup.classList.add("hidden");document.getElementById("game").classList.remove("hidden");let t=userTeam(),next=(userLeague().schedule[game.round-1]||[]).find(m=>m.home===game.userClub||m.away===game.userClub);clubName.textContent=game.userClub;clubInfo.innerHTML=`Liga: <b>${game.userLeague}</b><br>Sezona ${game.season}, kolo ${game.round}/30<br>Peníze: <b>${money(game.money)}</b><br>Reputace: ${game.reputation.toFixed(2)} | Fanoušci: ${game.fans}<br>Síla sestavy: ${teamPower(t,true).toFixed(1)}`;nextMatchBox.innerHTML=next?`${next.home} vs ${next.away}<br>Stav: ${next.played?"odehráno":"čeká se"}`:"Sezona dohraná.";financeBox.innerHTML=`Sponzor: ${money(game.sponsor)}/měsíc<br><button onclick="negotiateSponsor()">Jednat o sponzorovi</button>`;log.textContent=game.log.join("\n");squadTable.innerHTML=playerTable(t.players,"team");formationSelect.innerHTML=Object.keys(FORMATIONS).map(f=>`<option ${f===game.lineup.formation?"selected":""}>${f}</option>`).join("");tacticSelect.innerHTML=Object.keys(TACTICS).map(x=>`<option ${x===game.lineup.tactic?"selected":""}>${x}</option>`).join("");lineupInfo.innerHTML=`Rozestavení ${game.lineup.formation}, taktika ${game.lineup.tactic}. Hráč mimo pozici má slabší výkon.`;lineupTable.innerHTML=lineupHTML();captainSelect.innerHTML=roleOptions();penaltySelect.innerHTML=roleOptions();captainSelect.value=game.lineup.captain||"";penaltySelect.value=game.lineup.penalty||"";academyInfo.innerHTML=`Úroveň akademie: ${game.academyLevel}`;academyTable.innerHTML=playerTable(game.academy,"academy");leagueTitle.textContent=game.userLeague;leagueTable.innerHTML=standTable(standings());fillRoundSelect();renderSchedule();nationalCup.innerHTML=game.cup.last;euroCups.innerHTML=`${game.euro.last}<br>Kvalifikace: ${game.euro.qualified?game.euro.competition:"zatím ne"}`;marketTable.innerHTML=marketHTML(game.market,false);offersTable.innerHTML=offersHTML();scoutInfo.innerHTML=`Úroveň skautingu: ${game.scoutLevel}`;scoutResults.innerHTML=marketHTML(game.scoutFound,true);stadiumBox.innerHTML=`Název: <b>${game.stadiumName||("Stadion "+game.userClub)}</b><br>Kapacita: ${game.stadium}<br>VIP sektor: úroveň ${Math.floor(game.stadium/5000)}<br>Fan shop: automatický příjem ve vstupném<br>Vyšší kapacita = vyšší příjem ze vstupenek.`;trainingCenterBox.innerHTML=`Úroveň: ${game.trainingLevel}<br>Vyšší úroveň zrychluje růst hráčů.`;fansBox.innerHTML=`Fanoušci: ${game.fans}<br>Reputace: ${game.reputation.toFixed(2)}`;newsBox.innerHTML=game.news.map(n=>`<p>${n}</p>`).join("")||"Zatím žádné zprávy.";
+if(!game.board)game.board={president:"Prezident "+pick(LAST),trust:70,warnings:0,objective:objectiveForClub(game.userClub,game.userLeague)};
+if(!game.career)game.career={matches:0,wins:0,draws:0,losses:0,trophies:0,seasons:0};
+if(!game.stadiumName)game.stadiumName="Stadion "+game.userClub;
+boardBox.innerHTML=`Prezident: <b>${game.board.president}</b><br>Důvěra vedení: <b>${game.board.trust}%</b><br>Varování: ${game.board.warnings}/3`;
+seasonObjectiveBox.innerHTML=`Cíl: <b>${game.board.objective.text}</b><br>Požadované umístění: do ${game.board.objective.target}. místa`;
+managerStatusBox.innerHTML=game.board.trust>=65?"Pozice je stabilní.":game.board.trust>=35?"Pozice je nejistá.":"Hrozí odvolání.";
+careerStatsBox.innerHTML=wrapTable(`<table><tr><th>Sezony</th><th>Zápasy</th><th>Výhry</th><th>Remízy</th><th>Prohry</th><th>Trofeje</th><th>Nej nákup</th><th>Nej prodej</th></tr><tr><td>${game.career.seasons}</td><td>${game.career.matches}</td><td>${game.career.wins}</td><td>${game.career.draws}</td><td>${game.career.losses}</td><td>${game.career.trophies}</td><td>${money(game.records.buy)}</td><td>${money(game.records.sale)}</td></tr></table>`);
+coefficientsBox.innerHTML=wrapTable(`<table><tr><th>#</th><th>Liga</th><th>Stát</th><th>Koeficient</th><th>Liga mistrů</th><th>Evropská liga</th><th>Konferenční liga</th><th>Historie</th></tr>${getLeagueCoefficientTable().map((r,i)=>`<tr><td>${i+1}</td><td>${r.league}</td><td>${COUNTRY_BY_LEAGUE[r.league]}</td><td><b>${r.points}</b></td><td>${r.slots.cl}</td><td>${r.slots.el}</td><td>${r.slots.ecl}</td><td class="small">${(game.coefficients[r.league].history||[]).slice(0,3).join("<br>")}</td></tr>`).join("")}</table>`);
+if(typeof matchControlBox!=="undefined")matchControlBox.innerHTML=game.liveMatch?`<h3>${game.liveMatch.home} ${game.liveMatch.homeGoals}:${game.liveMatch.awayGoals} ${game.liveMatch.away}</h3><p>Minuta: ${game.liveMatch.minute}</p><div class="row"><button onclick="playLiveHalf()">${game.liveMatch.minute===0?"Odehrát 1. poločas":game.liveMatch.phase==="half"?"Odehrát 2. poločas":"Zápas dohrán"}</button><button onclick="changeLiveTactic('Velmi útočná')">Velmi útočná</button><button onclick="changeLiveTactic('Vyvážená')">Vyvážená</button><button onclick="changeLiveTactic('Velmi defenzivní')">Velmi defenzivní</button>${game.liveMatch.phase==="finished"?'<button class="primary" onclick="continueAfterLiveMatch()">Pokračovat po zápase</button>':""}</div><div class="log">${game.liveMatch.events.join("\\n")||"Zápas ještě nezačal."}</div>`:`<p>Stiskni <b>Spustit nejbližší zápas</b>. Tlačítko najde nejbližší neodehraný zápas tvého klubu.</p>`;
+worldLeagues.innerHTML=game.leagues.filter(l=>l.name!==game.userLeague).map(l=>`<h3>${l.name}</h3>${standTable(standings(l).slice(0,6))}`).join("<hr>");historyBox.innerHTML=`<h3>Sezony</h3>${game.history.map(h=>`<p>${h}</p>`).join("")||"Zatím nic."}<h3>Rekordy</h3><p>Největší výhra: ${game.records.biggestWin}<br>Nejdražší prodej: ${money(game.records.sale)}<br>Nejdražší nákup: ${money(game.records.buy)}<br>Nejvíce gólů hráče v sezoně: ${game.records.goals}</p><h3>Síň slávy</h3>${game.hall.map(h=>`<p>${h}</p>`).join("")||"Prázdná."}`;if(typeof backupBox!=="undefined")backupBox.innerHTML=backupInfoHTML()}
+function playerTable(ps,type){
+  const sorted=[...ps].sort((a,b)=>b.strength-a.strength);
+  const table=`<div class="desktop-table"><table><tr><th>Jméno</th><th>Věk</th><th>Poz.</th><th>Síla</th><th>Pot.</th><th>EXP</th><th>Kond.</th><th>Morálka</th><th>Sml.</th><th>Plat</th><th>Cena</th><th>Stav</th><th>Akce</th></tr>${sorted.map(p=>`<tr><td>${p.name}</td><td>${p.age}</td><td>${p.position}</td><td>${p.strength}</td><td>${p.potential}</td><td><div class="exp"><div style="width:${xp(p)}%"></div></div><span class="small">${p.exp}/${p.expToNext}</span></td><td>${p.fitness}%</td><td>${p.morale}%</td><td>${p.contract}</td><td>${money(p.salary)}</td><td>${money(p.value)}</td><td>${p.injured>0?`<span class="bad">Zraněn ${p.injured}</span>`:"OK"}</td><td>${type==="academy"?`<button onclick="promote('${p.id}')">Povýšit</button>`:type==="team"?`<button onclick="sell('${p.id}')">Prodat</button>`:""}</td></tr>`).join("")}</table></div>`;
+  return wrapTable(table)+playerCards(sorted,type);
+}
+function lineupHTML(){let slots=FORMATIONS[game.lineup.formation];return`<table><tr><th>Slot</th><th>Hráč</th><th>Pozice</th><th>Síla</th><th>Efektivita</th></tr>${game.lineup.starters.map((pid,i)=>{let p=userTeam().players.find(x=>x.id===pid);return`<tr><td>${slots[i]}</td><td>${p?p.name:"-"}</td><td>${p?p.position:"-"}</td><td>${p?p.strength:"-"}</td><td>${p?Math.round(posFactor(p,slots[i])*100)+"%":"-"}</td></tr>`}).join("")}</table>`}
+function roleOptions(){return starters().map(p=>`<option value="${p.id}">${p.name}</option>`).join("")}
+function standTable(ts){return`<table><tr><th>#</th><th>Klub</th><th>Pohár</th><th>Z</th><th>V</th><th>R</th><th>P</th><th>Skóre</th><th>Body</th></tr>${ts.map((t,i)=>`<tr><td>${i+1}</td><td>${t.name===game.userClub?`<b>${t.name}</b>`:t.name}</td><td>${getQualificationLabel(i+1,t.leagueName||game.userLeague)}</td><td>${t.wins+t.draws+t.losses}</td><td>${t.wins}</td><td>${t.draws}</td><td>${t.losses}</td><td>${t.gf}:${t.ga}</td><td><b>${t.points}</b></td></tr>`).join("")}</table>`}
+function fillRoundSelect(){if(typeof scheduleRoundSelect==="undefined")return;let cur=scheduleRoundSelect.value||game.round;scheduleRoundSelect.innerHTML=userLeague().schedule.map((_,i)=>`<option value="${i+1}">Kolo ${i+1}${i+1===game.round?" – aktuální":""}</option>`).join("");scheduleRoundSelect.value=cur<=30?cur:game.round}
+function renderSchedule(){if(typeof scheduleBox==="undefined")return;let rn=Number(scheduleRoundSelect.value||game.round),ro=userLeague().schedule[rn-1]||[];scheduleBox.innerHTML=`<h3>Kolo ${rn}</h3><table><tr><th>Domácí</th><th>Hosté</th><th>Výsledek</th><th>Detail</th></tr>${ro.map(m=>`<tr style="${m.home===game.userClub||m.away===game.userClub?'outline:1px solid var(--accent)':''}"><td>${m.home}</td><td>${m.away}</td><td>${m.score||"-"}</td><td class="small">${m.detail||"-"}</td></tr>`).join("")}</table>`}
+function marketHTML(ps,scouted){return`<table><tr><th>Jméno</th><th>Věk</th><th>Poz.</th><th>Síla</th><th>Pot.</th><th>Cena</th><th>Akce</th></tr>${ps.map(p=>`<tr><td>${p.name}</td><td>${p.age}</td><td>${p.position}</td><td>${p.strength}</td><td>${p.potential}</td><td>${money(p.value)}</td><td><button onclick="${scouted?`signScout('${p.id}')`:`buy('${p.id}')`}">${scouted?"Podepsat":"Koupit"}</button></td></tr>`).join("")}</table>`}
+function offersHTML(){return game.offers.length?`<table><tr><th>Hráč</th><th>Klub</th><th>Nabídka</th><th>Akce</th></tr>${game.offers.map(o=>`<tr><td>${o.player}</td><td>${o.buyer}</td><td>${money(o.amount)}</td><td><button onclick="acceptOffer('${o.id}')">Přijmout</button> <button onclick="negotiateOffer('${o.id}')">Vyjednat</button> <button onclick="rejectOffer('${o.id}')">Odmítnout</button></td></tr>`).join("")}</table>`:"Žádné nabídky."}
+
+const SAVE_VERSION="3.2";
+const SAVE_KEY="footballManagerV2";
+const AUTO_BACKUP_KEY="footballManagerV2_autoBackup";
+
+function prepareSaveData(){
+  if(!game)return null;
+  game.saveVersion=SAVE_VERSION;
+  game.savedAt=new Date().toISOString();
+  return game;
+}
+function saveAutoBackup(reason="auto"){
+  if(!game)return;
+  const data=prepareSaveData();
+  const backup={
+    version:SAVE_VERSION,
+    reason,
+    createdAt:new Date().toISOString(),
+    game:data
+  };
+  localStorage.setItem(AUTO_BACKUP_KEY,JSON.stringify(backup));
+}
+function downloadText(filename,text){
+  const blob=new Blob([text],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+function exportGame(){
+  if(!game){
+    alert("Nejdřív začni nebo načti hru.");
+    return;
+  }
+  const data=prepareSaveData();
+  const stamp=new Date().toISOString().slice(0,16).replace("T","_").replace(":","-");
+  const safeClub=(game.userClub||"klub").replace(/[^a-z0-9á-žÁ-Ž_-]+/gi,"-");
+  const filename=`fotbal-manager-${safeClub}-sezona-${game.season}-${stamp}.json`;
+  downloadText(filename,JSON.stringify({
+    app:"Fotbalový manažer",
+    version:SAVE_VERSION,
+    exportedAt:new Date().toISOString(),
+    game:data
+  },null,2));
+  addLog("Hra exportována do JSON souboru.");
+  render();
+}
+function importGame(event){
+  const file=event.target.files && event.target.files[0];
+  event.target.value="";
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    try{
+      const parsed=JSON.parse(reader.result);
+      const imported=parsed.game || parsed;
+      if(!imported || !imported.userClub || !imported.userLeague){
+        alert("Soubor nevypadá jako uložená hra Fotbalového manažera.");
+        return;
+      }
+      game=migrateSave(imported);
+      saveGame(false);
+      saveAutoBackup("import");
+      addLog("Hra byla importována ze souboru JSON.");
+      render();
+      showTab("home");
+    }catch(err){
+      alert("Import se nepovedl. JSON soubor je poškozený nebo má špatný formát.");
+      console.error(err);
+    }
+  };
+  reader.readAsText(file,"utf-8");
+}
+function migrateSave(data){
+  game=data;
+  if(!game.board)game.board={president:"Prezident "+pick(LAST),trust:70,warnings:0,objective:objectiveForClub(game.userClub,game.userLeague)};
+  if(!game.board.objective)game.board.objective=objectiveForClub(game.userClub,game.userLeague);
+  if(!game.career)game.career={matches:0,wins:0,draws:0,losses:0,trophies:0,seasons:0};
+  if(!game.coefficients)game.coefficients=Object.fromEntries(Object.keys(LEAGUES).map(l=>[l,{points:0,history:[],slots:defaultEuroSlots(8)}]));
+  Object.keys(LEAGUES).forEach(l=>{
+    if(!game.coefficients[l])game.coefficients[l]={points:0,history:[],slots:defaultEuroSlots(8)};
+    if(!game.coefficients[l].history)game.coefficients[l].history=[];
+    if(!game.coefficients[l].slots)game.coefficients[l].slots=defaultEuroSlots(8);
+  });
+  if(!game.stadiumName)game.stadiumName="Stadion "+game.userClub;
+  if(!game.records)game.records={biggestWin:"-",sale:0,buy:0,goals:0};
+  if(!game.news)game.news=[];
+  if(!game.log)game.log=[];
+  if(!game.history)game.history=[];
+  if(!game.hall)game.hall=[];
+  if(!game.offers)game.offers=[];
+  if(!game.market)game.market=[];
+  if(!game.scoutFound)game.scoutFound=[];
+  if(!game.academy)game.academy=[];
+  if(!game.lineup)game.lineup={formation:"4-4-2",tactic:"Vyvážená",starters:[],bench:[],captain:null,penalty:null};
+  if(!game.euro)game.euro={qualified:false,competition:"",last:"Do Evropy se lze kvalifikovat dobrým umístěním v lize."};
+  if(!game.cup)game.cup={last:"Národní pohár ještě nezačal."};
+  if(!game.leagues)game.leagues=Object.keys(LEAGUES).map(makeLeague);
+  game.leagues.forEach(l=>{
+    if(!l.schedule)l.schedule=genSchedule(l.teams.map(t=>t.name));
+    l.teams.forEach(t=>{
+      if(!t.leagueName)t.leagueName=l.name;
+      t.players.forEach(p=>{
+        if(p.fitness===undefined)p.fitness=100;
+        if(p.fatigue===undefined)p.fatigue=0;
+        if(p.morale===undefined)p.morale=70;
+        if(p.contract===undefined)p.contract=rnd(1,5);
+        if(p.rating===undefined)p.rating=6;
+        if(!p.history)p.history=[];
+        if(p.salary===undefined)p.salary=salary(p);
+        if(p.value===undefined)p.value=value(p);
+      });
+    });
+  });
+  game.academy.forEach(p=>{
+    if(p.fitness===undefined)p.fitness=100;
+    if(p.fatigue===undefined)p.fatigue=0;
+    if(p.morale===undefined)p.morale=70;
+    if(p.contract===undefined)p.contract=3;
+    if(p.salary===undefined)p.salary=0;
+    if(p.value===undefined)p.value=value(p);
+  });
+  game.saveVersion=SAVE_VERSION;
+  return game;
+}
+function restoreAutoBackup(){
+  const raw=localStorage.getItem(AUTO_BACKUP_KEY);
+  if(!raw){
+    alert("Žádná automatická záloha není uložená.");
+    return;
+  }
+  try{
+    const backup=JSON.parse(raw);
+    if(!confirm("Obnovit automatickou zálohu z "+new Date(backup.createdAt).toLocaleString("cs-CZ")+"? Aktuální pozice bude nahrazena."))return;
+    game=migrateSave(backup.game);
+    saveGame(false);
+    addLog("Obnovena automatická záloha.");
+    render();
+    showTab("home");
+  }catch(err){
+    alert("Automatická záloha je poškozená.");
+  }
+}
+function backupInfoHTML(){
+  const raw=localStorage.getItem(AUTO_BACKUP_KEY);
+  if(!raw)return '<p>Automatická záloha zatím není vytvořená.</p>';
+  try{
+    const b=JSON.parse(raw);
+    return `<div class="backup-ok">Poslední auto záloha:<br><b>${new Date(b.createdAt).toLocaleString("cs-CZ")}</b><br>Důvod: ${b.reason || "auto"}<br>Verze: ${b.version || "neznámá"}</div>`;
+  }catch(e){
+    return '<p class="bad">Automatická záloha je poškozená.</p>';
+  }
+}
+function saveGame(show=true){
+  if(!game)return;
+  prepareSaveData();
+  localStorage.setItem(SAVE_KEY,JSON.stringify(game));
+  saveAutoBackup(show?"manual":"auto");
+  if(show){
+    addLog("Hra uložena do prohlížeče a vytvořena automatická záloha.");
+    render();
+  }
+}
+function loadGame(){
+  let s=localStorage.getItem(SAVE_KEY);
+  if(!s)return alert("Žádná uložená hra.");
+  try{
+    game=migrateSave(JSON.parse(s));
+    render();
+    showTab("home");
+  }catch(err){
+    alert("Uložená hra v prohlížeči je poškozená. Zkus obnovit automatickou zálohu nebo importovat JSON.");
+    console.error(err);
+  }
+}
+function resetGame(){if(confirm("Smazat uloženou hru včetně automatické zálohy?")){localStorage.removeItem(SAVE_KEY);localStorage.removeItem(AUTO_BACKUP_KEY);location.reload()}}
+fillLeagueSelect();
+</script>
+</body>
+</html>
